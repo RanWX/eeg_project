@@ -48,9 +48,9 @@ def split_eeg_by_events(eeg_file_path, save_path, events):
         eeg_data_mat = h5py.File(eeg_file_path)
         eeg_file_name, suffix = os.path.splitext(os.path.basename(eeg_file_path))
         eeg_data = eeg_data_mat['data']
-        count = 1
+        count_11 = 0
+        count_22 = 0
         boundary_instead = None
-        # TODO: 2021 03 28
         for item in events[1:]:
             if item["type"] == "11":
                 boundary_instead = "22"
@@ -63,8 +63,8 @@ def split_eeg_by_events(eeg_file_path, save_path, events):
         if events[0]["type"] == 'boundary':
             events[0]["type"] = boundary_instead
             events[0]["latency"] = 0
-        data_split_list = []
-        type_split_list = []
+        filename_data = save_path + os.path.sep + eeg_file_name + "_data_split.hdf"
+        save_data = h5py.File(filename_data, 'w')
         for i in range(1, len(events) + 1):
             data_split = None
             if i == len(events):
@@ -72,17 +72,16 @@ def split_eeg_by_events(eeg_file_path, save_path, events):
             else:
                 data_split = eeg_data[int(events[i - 1]["latency"]):int(events[i]["latency"])]
             data_split = data_split.reshape(len(data_split), 62)
-            data_split_list.append(data_split)
-            type_split_list.append(str(events[i - 1]["type"]))
+            key = None
+            if str(events[i - 1]["type"]) == "11":
+                count_11 = count_11 + 1
+                key = str(events[i - 1]["type"]) + '_' + str(count_11)
+            else:
+                count_22 = count_11 + 1
+                key = str(events[i - 1]["type"]) + '_' + str(count_22)
+            save_data[key] = data_split
+        save_data.close()
 
-            data_split_name = eeg_file_name + "_event_" + str(events[i - 1]["type"]) + '_' + str(count) + ".npy"
-            save_base_path = save_path + os.path.sep + str(
-                events[i - 1]["type"]) + os.path.sep + eeg_file_name
-            save_file = save_base_path + os.path.sep + data_split_name
-            if not os.path.exists(save_base_path):
-                os.mkdir(save_base_path)
-            np.save(save_file, data_split)
-            count = count + 1
     except Exception as e:
         print("split_eeg_by_events error: {}. error message: {}".format(eeg_file_path, e))
 
@@ -103,8 +102,8 @@ if __name__ == '__main__':
     # batch_get_split_data(eeg_path, event_path, save_path)
 
     # file_path = "/Users/weiyong/Desktop/eeg/events/sub1_095_1_events.csv"
-    events = get_events_and_latency("/Users/ranshuang/Desktop/eeg/evets/sub1_068_1_events.csv")
-    eeg_file_path = "/Users/ranshuang/Desktop/eeg/eegmat/sub1_068_1.mat"
+    events = get_events_and_latency("/Users/ranshuang/Desktop/eeg/evets/sub1_068_2_events.csv")
+    eeg_file_path = "/Users/ranshuang/Desktop/eeg/eegmat/sub1_068_2.mat"
     save_path = "/Users/ranshuang/Desktop/eeg/save"
     event_path = "/Users/ranshuang/Desktop/eeg/events"
     split_eeg_by_events(eeg_file_path, save_path, events)
