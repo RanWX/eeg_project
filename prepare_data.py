@@ -14,9 +14,7 @@ class prepare_data():
         base_path = Path(self.data_path)
         hdf_path_list = base_path.glob("*.hdf")
         for hdf_path in hdf_path_list:
-            data_split_11_array, data_split_22_array = self.split_data(hdf_path, segment_length, overlap, sampling_rate)
-            self.data_split_11 = data_split_11_array
-            self.data_split_22 = data_split_22_array
+            self.split_data(hdf_path, segment_length, overlap, sampling_rate)
             if save:
                 save_base_path = Path(os.getcwd())
                 file_name = Path(hdf_path).stem
@@ -24,8 +22,8 @@ class prepare_data():
                     Path(save_base_path / Path("data/prepare_data")).mkdir(parents=True)
                 data_11_save_file_path = save_base_path / Path("data/prepare_data/" + file_name + "_11.hdf")
                 data_22_save_file_path = save_base_path / Path("data/prepare_data/" + file_name + "_22.hdf")
-                self.save_hdf_data({"data": data_split_11_array}, data_11_save_file_path)
-                self.save_hdf_data({"data": data_split_22_array}, data_22_save_file_path)
+                self.save_hdf_data({"data": self.data_split_11}, data_11_save_file_path)
+                self.save_hdf_data({"data": self.data_split_22}, data_22_save_file_path)
 
     def save_hdf_data(self, data_dict, save_file_path):
         f = h5py.File(save_file_path, 'w')
@@ -47,9 +45,8 @@ class prepare_data():
                     data_split_11.append(data[i * data_step:i * data_step + data_segment, :])
                 elif "22" in key:
                     data_split_22.append(data[i * data_step:i * data_step + data_segment, :])
-        data_split_11_array = np.stack(data_split_11, axis=0)
-        data_split_22_array = np.stack(data_split_22, axis=0)
-        return data_split_11_array, data_split_22_array
+        self.data_split_11 = np.stack(data_split_11, axis=0)
+        self.data_split_22 = np.stack(data_split_22, axis=0)
 
 
 if __name__ == '__main__':
