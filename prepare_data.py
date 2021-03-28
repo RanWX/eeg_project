@@ -4,33 +4,55 @@ import h5py
 import numpy as np
 
 
-# cut and save
-
 class prepare_data():
-    def __init__(self, mode, event_type, data_path):
-        self.mode = mode
+    def __init__(self, data_path):
         self.data_path = data_path
-        self.event_type = event_type
+        self.data_split_11 = None
+        self.data_split_22 = None
 
-    def split_data_and_save(self, segment_length=1, overlap=0, sampling_rate=1000, save=True):
-        base_path = Path(self.data_path) if self.event_type == "all" else Path(
-            Path(self.data_path) / Path(self.event_type))
-        npy_path_list = base_path.glob("**/*/*.npy")
-        data_split = []
-        label_split = []
-        for i in npy_path_list:
-            print(i)
+    def split_data_and_save(self, segment_length=2, overlap=0, sampling_rate=1000, save=True):
+        base_path = Path(self.data_path)
+        hdf_path_list = base_path.glob("*.hdf")
+        for hdf_path in hdf_path_list:
+            data_split_11_array, data_split_22_array = self.split_data(hdf_path, segment_length, overlap, sampling_rate)
+            self.data_split_11 = data_split_11_array
+            self.data_split_22 = data_split_22_array
+            if save:
+                save_base_path = Path(os.getcwd())
+                file_name = Path(hdf_path).stem
+                if not Path.exists(save_base_path / Path("data/prepare_data")):
+                    Path(save_base_path / Path("data/prepare_data")).mkdir(parents=True)
+                data_11_save_file_path = save_base_path / Path("data/prepare_data/" + file_name + "_11.hdf")
+                data_22_save_file_path = save_base_path / Path("data/prepare_data/" + file_name + "_22.hdf")
+                self.save_hdf_data({"data": data_split_11_array}, data_11_save_file_path)
+                self.save_hdf_data({"data": data_split_22_array}, data_22_save_file_path)
 
-        # save_path = Path(os.getcwd())
-        # if not Path.exists(save_path / Path("data/prepare_data")):
-        #     Path(save_path / Path("data/prepare_data")).mkdir(parents=True)
+    def save_hdf_data(self, data_dict, save_file_path):
+        f = h5py.File(save_file_path, 'w')
+        for k, v in data_dict.items():
+            f[k] = v
+        f.close()
 
-        # 取病人发病期数据和正常人对应的时间的数据
-
-    def split_data(self, npy_path):
-        pass
+    def split_data(self, hdf_path, segment_length, overlap, sampling_rate):
+        f = h5py.File(hdf_path)
+        data_step = int(segment_length * sampling_rate * (1 - overlap))
+        data_segment = sampling_rate * segment_length
+        data_split_11 = []
+        data_split_22 = []
+        for key in f.keys():
+            data = f[key]
+            number_segment = int((data.shape[0] - data_segment) // (data_step)) + 1
+            for i in range(number_segment):
+                if "11" in key:
+                    data_split_11.append(data[i * data_step:i * data_step + data_segment, :])
+                elif "22" in key:
+                    data_split_22.append(data[i * data_step:i * data_step + data_segment, :])
+        data_split_11_array = np.stack(data_split_11, axis=0)
+        data_split_22_array = np.stack(data_split_22, axis=0)
+        return data_split_11_array, data_split_22_array
 
 
 if __name__ == '__main__':
-    pre = prepare_data(1, "all", "/Users/ranshuang/Desktop/eeg/save")
+    pre = prepare_data("/Users/ranshuang/Desktop/eeg/save")
     pre.split_data_and_save()
+    # pre.split_data("/Users/ranshuang/Desktop/eeg/save/sub1_068_2_data_split.hdf")

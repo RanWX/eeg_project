@@ -1,6 +1,5 @@
 import h5py
 import csv
-import numpy as np
 import os
 
 
@@ -77,7 +76,7 @@ def split_eeg_by_events(eeg_file_path, save_path, events):
                 count_11 = count_11 + 1
                 key = str(events[i - 1]["type"]) + '_' + str(count_11)
             else:
-                count_22 = count_11 + 1
+                count_22 = count_22 + 1
                 key = str(events[i - 1]["type"]) + '_' + str(count_22)
             save_data[key] = data_split
         save_data.close()
