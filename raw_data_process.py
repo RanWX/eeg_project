@@ -44,7 +44,7 @@ def flatten(a):
 
 def split_eeg_by_events(eeg_file_path, save_path, events):
     try:
-        eeg_data_mat = h5py.File(eeg_file_path)
+        eeg_data_mat = h5py.File(eeg_file_path, 'r')
         eeg_file_name, suffix = os.path.splitext(os.path.basename(eeg_file_path))
         eeg_data = eeg_data_mat['data']
         count_11 = 0
@@ -71,6 +71,7 @@ def split_eeg_by_events(eeg_file_path, save_path, events):
             else:
                 data_split = eeg_data[int(events[i - 1]["latency"]):int(events[i]["latency"])]
             data_split = data_split.reshape(len(data_split), 62)
+            data_split = data_split.transpose(1, 0)
             key = None
             if str(events[i - 1]["type"]) == "11":
                 count_11 = count_11 + 1

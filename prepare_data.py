@@ -49,12 +49,12 @@ class prepare_data():
             data_split_22 = []
             for key in f.keys():
                 data = f[key]
-                number_segment = int((data.shape[0] - data_segment) // (data_step)) + 1
+                number_segment = int((data.shape[1] - data_segment) // (data_step)) + 1
                 for i in range(number_segment):
                     if "11" in key:
-                        data_split_11.append(data[i * data_step:i * data_step + data_segment, :])
+                        data_split_11.append(data[:, i * data_step:i * data_step + data_segment])
                     elif "22" in key:
-                        data_split_22.append(data[i * data_step:i * data_step + data_segment, :])
+                        data_split_22.append(data[:, i * data_step:i * data_step + data_segment])
             self.data_split_11 = np.stack(data_split_11, axis=0)
             self.data_split_22 = np.stack(data_split_22, axis=0)
         except Exception as e:
