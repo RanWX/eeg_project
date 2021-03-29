@@ -95,14 +95,14 @@ def batch_get_split_data(eeg_path, event_path, save_path):
 
 
 if __name__ == '__main__':
-    # eeg_path = "/Users/weiyong/Desktop/eeg/eeg_mat"
-    # event_path = "/Users/weiyong/Desktop/eeg/events"
-    # save_path = "/Users/weiyong/Desktop/eeg/save"
-    # batch_get_split_data(eeg_path, event_path, save_path)
+    eeg_path = "/Users/weiyong/Desktop/eeg/eeg_mat"
+    event_path = "/Users/weiyong/Desktop/eeg/events"
+    save_path = "/Users/weiyong/Desktop/eeg/save"
+    batch_get_split_data(eeg_path, event_path, save_path)
 
     # file_path = "/Users/weiyong/Desktop/eeg/events/sub1_095_1_events.csv"
-    events = get_events_and_latency("/Users/ranshuang/Desktop/eeg/evets/sub1_068_2_events.csv")
-    eeg_file_path = "/Users/ranshuang/Desktop/eeg/eegmat/sub1_068_2.mat"
-    save_path = "/Users/ranshuang/Desktop/eeg/save"
-    event_path = "/Users/ranshuang/Desktop/eeg/events"
-    split_eeg_by_events(eeg_file_path, save_path, events)
+    # events = get_events_and_latency("/Users/ranshuang/Desktop/eeg/evets/sub1_068_2_events.csv")
+    # eeg_file_path = "/Users/ranshuang/Desktop/eeg/eegmat/sub1_068_2.mat"
+    # save_path = "/Users/ranshuang/Desktop/eeg/save"
+    # event_path = "/Users/ranshuang/Desktop/eeg/events"
+    # split_eeg_by_events(eeg_file_path, save_path, events)
