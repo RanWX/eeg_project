@@ -24,10 +24,10 @@ class prepare_data():
             if save:
                 save_base_path = Path(os.getcwd())
                 file_name = Path(hdf_path).stem
-                if not Path.exists(save_base_path / Path("data/prepare_data")):
-                    Path(save_base_path / Path("data/prepare_data")).mkdir(parents=True)
-                data_11_save_file_path = save_base_path / Path("data/prepare_data/" + file_name + "_11.hdf")
-                data_22_save_file_path = save_base_path / Path("data/prepare_data/" + file_name + "_22.hdf")
+                if not Path.exists(save_base_path / Path("data")):
+                    Path(save_base_path / Path("data")).mkdir(parents=True)
+                data_11_save_file_path = save_base_path / Path("data/" + file_name + "_11.hdf")
+                data_22_save_file_path = save_base_path / Path("data/" + file_name + "_22.hdf")
                 self.save_hdf_data({"data": self.data_split_11}, data_11_save_file_path)
                 self.save_hdf_data({"data": self.data_split_22}, data_22_save_file_path)
 
