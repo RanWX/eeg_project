@@ -22,7 +22,7 @@ def split_dataset_by_proportion(event, src_path="", seed=0, **proportion):
         # count = 0
         for i in hdf_path_list:
             # if count > 100: break
-            count = count + 1
+            # count = count + 1
             file_name = i.stem
             print(file_name)
             class_name, class_index = _get_class_info(file_name)
