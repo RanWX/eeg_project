@@ -21,10 +21,10 @@ def split_dataset_by_proportion(event, src_path="", seed=0, **proportion):
         data_unhealthy_list = []
         # count = 0
         for i in hdf_path_list:
-            # if count > 100: break
+            # if count > 10: break
             # count = count + 1
             file_name = i.stem
-            print(file_name)
+            # print(file_name)
             class_name, class_index = _get_class_info(file_name)
             data_path = base_path / Path(i)
             split_data = h5py.File(data_path, 'r')["data"]
@@ -64,7 +64,7 @@ def split_dataset_by_proportion(event, src_path="", seed=0, **proportion):
         print("split_dataset_by_proportion error. error message is: {}".format(e))
 
 
-def get_data_and_labels_with_batchsize(data_list, batch_size=5, seed=0):
+def get_data_and_labels_with_batchsize(data_list, batch_size=128, seed=0):
     '''
     获得一个echo的所有batch
     :param data_list:
