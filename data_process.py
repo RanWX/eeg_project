@@ -19,9 +19,9 @@ def split_dataset_by_proportion(event, src_path="", seed=0, **proportion):
         hdf_path_list = base_path.glob("*_{}.hdf".format(str(event)))
         data_healthy_list = []
         data_unhealthy_list = []
-        count = 0
+        # count = 0
         for i in hdf_path_list:
-            if count > 100: break
+            # if count > 100: break
             count = count + 1
             file_name = i.stem
             print(file_name)
