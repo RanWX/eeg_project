@@ -4,13 +4,13 @@ import numpy as np
 import h5py
 
 
-def split_dataset_by_proportion(event, src_path="", proportion=0.8, seed=0):
+def split_dataset_by_proportion(event, src_path="", seed=0, **proportion):
     '''
     根据需要将数据按比例分割
     :param event: "11", "22" or "*"(11&22)
     :param src_path: data path
     :param type: train
-    :param proportion:
+    :param proportion: the proportion of train, test and val
     :param seed:
     :return: train_data_list: [{"data_path":"", "class_name":"", "class_index":0, "data_matrix":""}], val_data_list: [{"data_path":"", "class_name":"", "class_index":0, "data_matrix":""}]
     '''
@@ -38,13 +38,27 @@ def split_dataset_by_proportion(event, src_path="", proportion=0.8, seed=0):
         np.random.seed(seed)
         healthy_index_perm_list = np.random.permutation(len(data_healthy_list))
         unhealthy_index_perm_list = np.random.permutation(len(data_unhealthy_list))
-        healthy_train_len = int(len(data_healthy_list) * proportion)
-        unhealthy_train_len = int(len(data_unhealthy_list) * proportion)
+
+        healthy_train_len = int(len(data_healthy_list) * proportion["train"])
+        healthy_val_len = int(len(data_healthy_list) * proportion["val"])
+        healthy_test_len = int(len(data_healthy_list) * proportion["test"])
+
+        unhealthy_train_len = int(len(data_unhealthy_list) * proportion["train"])
+        unhealthy_val_len = int(len(data_unhealthy_list) * proportion["val"])
+        unhealthy_test_len = int(len(data_unhealthy_list) * proportion["test"])
+
         train_data_list = [data_healthy_list[i] for i in healthy_index_perm_list[:healthy_train_len]] + [
             data_unhealthy_list[j] for j in unhealthy_index_perm_list[:unhealthy_train_len]]
-        val_data_list = [data_healthy_list[i] for i in healthy_index_perm_list[healthy_train_len:]] + [
-            data_unhealthy_list[j] for j in unhealthy_index_perm_list[unhealthy_train_len:]]
-        return train_data_list, val_data_list
+        test_data_list = [data_healthy_list[i] for i in
+                          healthy_index_perm_list[healthy_train_len:healthy_train_len + healthy_test_len]] + [
+                             data_unhealthy_list[j] for j in
+                             unhealthy_index_perm_list[unhealthy_train_len:unhealthy_train_len + unhealthy_test_len]]
+        val_data_list = [data_healthy_list[i] for i in
+                         healthy_index_perm_list[
+                         healthy_train_len + healthy_test_len:healthy_train_len + healthy_test_len + healthy_val_len]] + [
+                            data_unhealthy_list[j] for j in unhealthy_index_perm_list[
+                                                            unhealthy_train_len + unhealthy_test_len:unhealthy_train_len + unhealthy_test_len + unhealthy_val_len]]
+        return train_data_list, val_data_list, test_data_list
 
     except Exception as e:
         print("split_dataset_by_proportion error. error message is: {}".format(e))
@@ -93,6 +107,8 @@ def _get_class_info(str):
 
 
 if __name__ == '__main__':
-    train_data_list, val_data_list = split_dataset_by_proportion("*")
+    proportion = {"train": 0.6, "test": 0.2, "val": 0.2}
+    train_data_list, val_data_list, test_data_list = split_dataset_by_proportion("11", src_path="", seed=0,
+                                                                                 **proportion)
     a, b = get_data_and_labels_with_batchsize(train_data_list, batch_size=5, seed=0)
     c = 0
