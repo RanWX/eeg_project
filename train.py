@@ -1,4 +1,4 @@
-import datetime, os
+import datetime, os, time
 from pathlib import Path
 import torch, h5py
 import numpy as np
@@ -160,11 +160,7 @@ class train():
 
         Acc_val = []
         Loss_val = []
-        val_losses = []
-        val_acc = []
 
-        test_losses = []
-        test_acc = []
         Acc_test = []
 
         # hyper-parameter
@@ -209,10 +205,10 @@ class train():
 
         ######## Training process ########
         print("start train")
-        Acc = []
         acc_max = 0
         patient = 0
 
+        start_time = time.time()
         for epoch in range(num_epochs):
             loss_epoch = []
             acc_epoch = []
@@ -230,12 +226,12 @@ class train():
 
             losses.append(sum(loss_epoch) / len(loss_epoch))
             accs.append(sum(acc_epoch) / len(acc_epoch))
-            loss_epoch = []
-            acc_epoch = []
             print('Epoch [{}/{}], Loss: {:.4f}, Acc: {:.4f}'
                   .format(epoch + 1, num_epochs, losses[-1], accs[-1]))
 
             ######## Validation process ########
+            val_losses = []
+            val_acc = []
             with torch.no_grad():
                 for x_batch, y_batch in zip(val_list[0], val_list[1]):
                     x_batch = np.array(x_batch)
@@ -259,8 +255,6 @@ class train():
                 Loss_val.append(sum(val_losses) / len(val_losses))
                 print('Evaluation Loss:{:.4f}, Acc: {:.4f}'
                       .format(Loss_val[-1], Acc_val[-1]))
-                val_losses = []
-                val_acc = []
 
             ######## early stop ########
             Acc_es = Acc_val[-1]
@@ -277,36 +271,37 @@ class train():
                 break
 
         ######## test process ########
-        print("start test")
-        model = torch.load('max_model.pt')
-        with torch.no_grad():
-            for (x_batch, y_batch) in zip(test_list[0], test_list[1]):
-                x_batch = np.array(x_batch)
-                x_batch = np.expand_dims(x_batch, axis=1)
-                x_batch = torch.from_numpy(x_batch)
-                y_batch = torch.from_numpy(np.array(y_batch))
-                x_batch = x_batch.to(self.device)
-                y_batch = y_batch.to(self.device)
+        # print("start test")
+        #     test_losses = []
+        #     test_acc = []
+        # model = torch.load('max_model.pt')
+        # with torch.no_grad():
+        #     for (x_batch, y_batch) in zip(test_list[0], test_list[1]):
+        #         x_batch = np.array(x_batch)
+        #         x_batch = np.expand_dims(x_batch, axis=1)
+        #         x_batch = torch.from_numpy(x_batch)
+        #         y_batch = torch.from_numpy(np.array(y_batch))
+        #         x_batch = x_batch.to(self.device)
+        #         y_batch = y_batch.to(self.device)
+        #
+        #         model.eval()
+        #
+        #         yhat = model(x_batch)
+        #         pred = yhat.max(1)[1]
+        #         correct = (pred == y_batch).sum()
+        #         acc = correct.item() / len(pred)
+        #         test_loss = loss_fn(yhat, y_batch)
+        #         test_losses.append(test_loss.item())
+        #         test_acc.append(acc)
+        #
+        #     print('Test Loss:{:.4f}, Acc: {:.4f}'
+        #           .format(sum(test_losses) / len(test_losses), sum(test_acc) / len(test_acc)))
+        #     Acc_test = (sum(test_acc) / len(test_acc))
 
-                model.eval()
-
-                yhat = model(x_batch)
-                pred = yhat.max(1)[1]
-                correct = (pred == y_batch).sum()
-                acc = correct.item() / len(pred)
-                test_loss = loss_fn(yhat, y_batch)
-                test_losses.append(test_loss.item())
-                test_acc.append(acc)
-
-            print('Test Loss:{:.4f}, Acc: {:.4f}'
-                  .format(sum(test_losses) / len(test_losses), sum(test_acc) / len(test_acc)))
-            Acc_test = (sum(test_acc) / len(test_acc))
-            test_losses = []
-            test_acc = []
         # save the loss(acc) for plotting the loss(acc) curve
         save_path = Path(os.getcwd())
-        if not Path.exists(save_path/Path('Result_model/Leave_one_session_out/history')):
-            Path(save_path/Path('Result_model/Leave_one_session_out/history')).mkdir(parents=True)
+        if not Path.exists(save_path / Path('Result_model/Leave_one_session_out/history')):
+            Path(save_path / Path('Result_model/Leave_one_session_out/history')).mkdir(parents=True)
         if cv_type == "leave_one_session_out":
             filename_callback = save_path / Path('Result_model/Leave_one_session_out/history/' + 'train_history.hdf')
             save_history = h5py.File(filename_callback, 'w')
@@ -315,7 +310,10 @@ class train():
             save_history['loss'] = losses
             save_history['val_loss'] = Loss_val
             save_history.close()
-        return Acc_test
+        time_elapsed = time.time() - start_time
+        print('Training complete in {:.0f}m {:.0f}s'.format(
+            time_elapsed // 60, time_elapsed % 60))
+        print('Best val Acc: {:4f}'.format(acc_max))
 
     def make_train_step(self, model, loss_fn, optimizer):
         def train_step(x, y):
