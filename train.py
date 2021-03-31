@@ -186,9 +186,10 @@ class train():
 
         loss_fn = nn.CrossEntropyLoss()
 
-        if torch.cuda.is_available():
-            model = model.to(self.device)
-            loss_fn = loss_fn.to(self.device)
+        model = model.to(self.device)
+        loss_fn = loss_fn.to(self.device)
+        if torch.cuda.device_count() > 1:
+            model = nn.DataParallel(model)
 
         train_step = self.make_train_step(model, loss_fn, optimizer)
 
