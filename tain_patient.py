@@ -351,7 +351,7 @@ if __name__ == '__main__':
                         sampling_rate=256,
                         random_seed=42,
                         learning_rate=0.001,
-                        epoch=50,
+                        epoch=100,
                         batch_size=32,
                         dropout=0.3,
                         hiden_node=128,
@@ -359,6 +359,6 @@ if __name__ == '__main__':
                         num_T=9,
                         num_S=6,
                         Lambda=0.000001)
-    train_data_list, val_data_list, test_data_list = data_process.split_dataset_by_proportion("11", src_path="", seed=0,
+    train_data_list, val_data_list, test_data_list = data_process.split_unhealthy_data_by_proportion("11", src_path="", seed=0,
                                                                                               **proportion)
     train.train_model(train_data_list, val_data_list, test_data_list, "leave_one_session_out")
