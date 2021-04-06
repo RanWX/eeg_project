@@ -212,19 +212,19 @@ class Sception(nn.Module):
 ############################################ EEGNET ########################################
 # 64 * 2000
 class EEGNet(nn.Module):
-    def __init__(self, class_num, chan, dropout1, dropout2, time_point, samples=128):
+    def __init__(self, class_num, chan, dropout1, dropout2, time_point, samples):
         super(EEGNet, self).__init__()
         self.first_layer = nn.Sequential(
             # TODO kernel_size
-            nn.ZeroPad2d((499, 500, 0, 0)),
-            nn.Conv2d(1, 16, kernel_size=(1, samples/2), stride=(1, 1), padding=0, bias=False),
-            nn.BatchNorm2d(16) # 16 C T
+            nn.ZeroPad2d((499, 0, 0, 0)),
+            nn.Conv2d(1, 16, kernel_size=(1, int(samples / 2)), stride=(1, 1), padding=0, bias=False),
+            nn.BatchNorm2d(16)  # 16 C T
         )
         self.depth_wise_conv = nn.Sequential(
-            nn.Conv2d(16, 2 * 16, kernel_size=(chan, 1), stride=(1, 1), groups=16, bias=False), # 32 1 T
-            nn.BatchNorm2d(32), # 32 1 T
+            nn.Conv2d(16, 2 * 16, kernel_size=(chan, 1), stride=(1, 1), groups=16, bias=False),  # 32 1 T
+            nn.BatchNorm2d(32),  # 32 1 T
             nn.ELU(),
-            nn.AvgPool2d(kernel_size=(1, 4), stride=(1, 4), padding=0), # 32 1 T//4
+            nn.AvgPool2d(kernel_size=(1, 4), stride=(1, 4), padding=0),  # 32 1 T//4
             nn.Dropout(p=dropout1)
         )
         self.separable_conv = nn.Sequential(
