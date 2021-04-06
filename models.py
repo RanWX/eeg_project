@@ -217,7 +217,7 @@ class EEGNet(nn.Module):
         self.first_layer = nn.Sequential(
             # TODO kernel_size
             nn.ZeroPad2d((499, 500, 0, 0)),
-            nn.Conv2d(1, 16, kernel_size=(1, 1000), stride=(1, 1), padding=0, bias=False),
+            nn.Conv2d(1, 16, kernel_size=(1, samples/2), stride=(1, 1), padding=0, bias=False),
             nn.BatchNorm2d(16) # 16 C T
         )
         self.depth_wise_conv = nn.Sequential(
