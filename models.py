@@ -215,14 +215,16 @@ class EEGNet(nn.Module):
     def __init__(self, class_num, chan, dropout1, dropout2, time_point, samples=128):
         super(EEGNet, self).__init__()
         self.first_layer = nn.Sequential(
-            nn.Conv2d(1, 16, kernel_size=(1, samples / 2), stride=(1, 1), padding=0, bias=False),
-            nn.BatchNorm2d(16)
+            # TODO kernel_size
+            nn.ZeroPad2d((499, 500, 0, 0)),
+            nn.Conv2d(1, 16, kernel_size=(1, 1000), stride=(1, 1), padding=0, bias=False),
+            nn.BatchNorm2d(16) # 16 C T
         )
         self.depth_wise_conv = nn.Sequential(
-            nn.Conv2d(2 * 16, kernel_size=(chan, 1), stride=(1, 1), groups=16, bias=False),
-            nn.BatchNorm2d(32),
+            nn.Conv2d(16, 2 * 16, kernel_size=(chan, 1), stride=(1, 1), groups=16, bias=False), # 32 1 T
+            nn.BatchNorm2d(32), # 32 1 T
             nn.ELU(),
-            nn.AvgPool2d(kernel_size=(1, 4), stride=(1, 4), padding=0),
+            nn.AvgPool2d(kernel_size=(1, 4), stride=(1, 4), padding=0), # 32 1 T//4
             nn.Dropout(p=dropout1)
         )
         self.separable_conv = nn.Sequential(
@@ -232,22 +234,33 @@ class EEGNet(nn.Module):
             nn.AvgPool2d(kernel_size=(1, 8), stride=(1, 8), padding=0),
             nn.Dropout(p=dropout2)
         )
-        self.out = nn.Linear((2 * (32 * time_point // 32)), class_num)
+        self.out = nn.Linear((32 * (time_point // 32)), class_num)
 
     def forward(self, x):
-        x = self.firstConv(x)
-        x = self.depthwiseConv(x)
-        x = self.separableConv(x)
-        x = x.view(-1, self.out[0].in_features)
+        x = self.first_layer(x)
+        print("first_layer: {}".format(x.shape))
+        x = self.depth_wise_conv(x)
+        print("depth_wise_conv: {}".format(x.shape))
+        x = self.separable_conv(x)
+        print("separable_conv: {}".format(x.shape))
+        x = x.view(x.size(0), -1)
+        print("separable_conv next: {}".format(x.shape))
         x = self.out(x)
         return x
 
 
 if __name__ == "__main__":
-    model = TSception(2, (4, 1024), 256, 9, 6, 128, 0.2)
+    # model = TSception(2, (4, 1024), 256, 9, 6, 128, 0.2)
     # model = Sception(2,(4,1024),256,6,128,0.2)
     # model = Tception(2,(4,1024),256,9,128,0.2)
-    print(model)
-    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(pytorch_total_params)
-    input = torch.randn(32, 1, 22, 1125)
+    # print(model)
+    # pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    # print(pytorch_total_params)
+    # input = torch.randn(32, 1, 22, 1125)
+
+    eeg_net = EEGNet(2, 62, 0.25, 0.25, 2000, 1000)
+    input1 = torch.randn(1, 1, 62, 2000)
+    # loss_fn = nn.CrossEntropyLoss()
+    # optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    eeg_net.train()
+    output = eeg_net(input1)
