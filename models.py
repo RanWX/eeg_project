@@ -209,6 +209,40 @@ class Sception(nn.Module):
         return out.size()
 
 
+############################################ EEGNET ########################################
+# 64 * 2000
+class EEGNet(nn.Module):
+    def __init__(self, class_num, chan, dropout1, dropout2, time_point, samples=128):
+        super(EEGNet, self).__init__()
+        self.first_layer = nn.Sequential(
+            nn.Conv2d(1, 16, kernel_size=(1, samples / 2), stride=(1, 1), padding=0, bias=False),
+            nn.BatchNorm2d(16)
+        )
+        self.depth_wise_conv = nn.Sequential(
+            nn.Conv2d(2 * 16, kernel_size=(chan, 1), stride=(1, 1), groups=16, bias=False),
+            nn.BatchNorm2d(32),
+            nn.ELU(),
+            nn.AvgPool2d(kernel_size=(1, 4), stride=(1, 4), padding=0),
+            nn.Dropout(p=dropout1)
+        )
+        self.separable_conv = nn.Sequential(
+            nn.Conv2d(32, 32, kernel_size=(1, 16), stride=(1, 1), padding=(0, 7), bias=False),
+            nn.BatchNorm2d(32),
+            nn.ELU(),
+            nn.AvgPool2d(kernel_size=(1, 8), stride=(1, 8), padding=0),
+            nn.Dropout(p=dropout2)
+        )
+        self.out = nn.Linear((2 * (32 * time_point // 32)), class_num)
+
+    def forward(self, x):
+        x = self.firstConv(x)
+        x = self.depthwiseConv(x)
+        x = self.separableConv(x)
+        x = x.view(-1, self.out[0].in_features)
+        x = self.out(x)
+        return x
+
+
 if __name__ == "__main__":
     model = TSception(2, (4, 1024), 256, 9, 6, 128, 0.2)
     # model = Sception(2,(4,1024),256,6,128,0.2)
@@ -216,3 +250,4 @@ if __name__ == "__main__":
     print(model)
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(pytorch_total_params)
+    input = torch.randn(32, 1, 22, 1125)
