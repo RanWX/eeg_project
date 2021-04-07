@@ -238,14 +238,17 @@ class EEGNet(nn.Module):
 
     def forward(self, x):
         x = self.first_layer(x)
-        print("first_layer: {}".format(x.shape))
+        # print("first_layer: {}".format(x.shape))
         x = self.depth_wise_conv(x)
-        print("depth_wise_conv: {}".format(x.shape))
+        # print("depth_wise_conv: {}".format(x.shape))
         x = self.separable_conv(x)
-        print("separable_conv: {}".format(x.shape))
+        # print("separable_conv: {}".format(x.shape))
         x = x.view(x.size(0), -1)
-        print("separable_conv next: {}".format(x.shape))
+        # print("separable_conv next: {}".format(x.shape))
         x = self.out(x)
+        # print("out: {}".format((x.shape)))
+        x = F.softmax(x, dim=1)
+        # print("out lastu: {}".format((x.shape)))
         return x
 
 
