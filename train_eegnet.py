@@ -165,8 +165,8 @@ class train():
 
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-        # loss_fn = nn.CrossEntropyLoss()
-        loss_fn = nn.BCELoss()
+        loss_fn = nn.CrossEntropyLoss()
+        # loss_fn = nn.BCELoss()
 
         model = model.to(self.device)
         loss_fn = loss_fn.to(self.device)
@@ -202,10 +202,10 @@ class train():
                 y_batch = torch.from_numpy(np.array(y_batch))
                 x_batch = x_batch.to(self.device)
                 y_batch = y_batch.to(self.device)
-
                 loss, acc = train_step(x_batch, y_batch)
                 loss_epoch.append(loss)
                 acc_epoch.append(acc)
+
 
             losses.append(sum(loss_epoch) / len(loss_epoch))
             accs.append(sum(acc_epoch) / len(acc_epoch))
@@ -308,7 +308,8 @@ class train():
             # L1 regularization
             loss_r = self.regulization(model, self.Lambda)
             # yhat is in one-hot representation;
-            loss = loss_fn(yhat, y) + loss_r
+            loss_b = loss_fn(yhat, y)
+            loss = loss_b + loss_r
             # loss = loss_fn(yhat, y)
             loss.backward()
             optimizer.step()
