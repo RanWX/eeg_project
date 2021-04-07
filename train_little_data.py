@@ -248,7 +248,7 @@ class train():
                     pred = yhat.max(1)[1]
                     correct = (pred == y_batch).sum()
                     acc = correct.item() / len(pred)
-                    val_loss = loss_fn(yhat, y_batch)
+                    val_loss = loss_fn(yhat, y_batch.long())
                     val_losses.append(val_loss.item())
                     val_acc.append(acc)
 
@@ -291,7 +291,7 @@ class train():
         #         pred = yhat.max(1)[1]
         #         correct = (pred == y_batch).sum()
         #         acc = correct.item() / len(pred)
-        #         test_loss = loss_fn(yhat, y_batch)
+        #         test_loss = loss_fn(yhat, y_batch.long())
         #         test_losses.append(test_loss.item())
         #         test_acc.append(acc)
         #
@@ -326,7 +326,7 @@ class train():
             # L1 regularization
             loss_r = self.regulization(model, self.Lambda)
             # yhat is in one-hot representation;
-            loss = loss_fn(yhat, y) + loss_r
+            loss = loss_fn(yhat, y.long()) + loss_r
             # loss = loss_fn(yhat, y)
             loss.backward()
             optimizer.step()
