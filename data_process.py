@@ -314,4 +314,4 @@ if __name__ == '__main__':
     #                                                                              **proportion)
     # a, b = get_data_and_labels_with_batchsize(train_data_list, batch_size=5, seed=0)
     # split_unhealthy_data_by_proportion(src_path="", seed=0, **proportion)
-    split_specify_time_dataset_by_proportion("11", 10, src_path="", seed=0, **proportion)
+    split_specify_time_dataset_by_proportion_1122(10, src_path="", seed=0, **proportion)

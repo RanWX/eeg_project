@@ -97,18 +97,16 @@ def batch_get_split_data(eeg_path, event_path, save_path):
 
 
 if __name__ == '__main__':
-    # eeg_path = "/Users/weiyong/Desktop/eeg/eeg_mat"
-    # event_path = "/Users/weiyong/Desktop/eeg/events"
-    # save_path = "/Users/weiyong/Desktop/eeg/save"
-    # batch_get_split_data(eeg_path, event_path, save_path)
+    eeg_path = "/Users/weiyong/Desktop/eeg/eeg_mat"
+    event_path = "/Users/weiyong/Desktop/eeg/events"
+    save_path = "/Users/weiyong/Desktop/eeg/save_2"
+    batch_get_split_data(eeg_path, event_path, save_path)
 
     # file_path = "/Users/weiyong/Desktop/eeg/events/sub1_095_1_events.csv"
     # events = get_events_and_latency("/Users/weiyong/Desktop/eeg/events/sub1_005_2_events.csv")
     # eeg_file_path = "/Users/weiyong/Desktop/eeg/eeg_mat/sub1_005_2.mat"
     # save_path = "/Users/weiyong/Desktop/eeg/save_2/"
     # split_eeg_by_events(eeg_file_path, save_path, events)
-    save_path = "/Users/weiyong/Desktop/eeg/save_2/sub1_005_2_data_split.hdf"
-    f = h5py.File(save_path, 'r')
-    for i in f.keys():
-        print(i)
+    # save_path = "/Users/weiyong/Desktop/eeg/save_2/sub1_005_2_data_split.hdf"
+
 
