@@ -211,7 +211,7 @@ class train():
         save_list = []
 
         start_time = time.time()
-        pt_name = 'max_model_1122_same_{}.pt'.format(str(time_point))
+        pt_name = 'max_model_1122_same_{}.pt'.format(str(time_point*2))
         for epoch in range(num_epochs):
             loss_epoch = []
             acc_epoch = []
@@ -328,7 +328,7 @@ class train():
         print('Best val Acc: {:4f}'.format(acc_max))
         save_list.append('Best val Acc: {:4f}'.format(acc_max))
         save_str = "\n".join(save_list)
-        with open("result_1122_same/result_1122_same_{}.txt".format(str(time_point)),"w") as f:
+        with open("result_1122_same/result_1122_same_{}.txt".format(str(time_point*2)),"w") as f:
             f.write(save_str)
 
     def make_train_step(self, model, loss_fn, optimizer):
