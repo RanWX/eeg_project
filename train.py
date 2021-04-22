@@ -149,7 +149,7 @@ class train():
 
         file.close()
 
-    def train_model(self, train_data_list, val_data_list, test_data_list, cv_type):
+    def train_model(self, train_data_list, val_data_list, test_data_list, cv_type, i):
         # TODO: no cuda
         # print('Avaliable device:' + str(torch.cuda.get_device_name(torch.cuda.current_device())))
         torch.manual_seed(self.random_seed)
@@ -205,7 +205,9 @@ class train():
         val_list = [val_batch_data_list, val_batch_label_list]
 
         ######## Training process ########
-        print("start train")
+        # print("start train")
+        save_list = []
+        save_list.append("************ {} fold **********".format(str(i)))
         acc_max = 0
         patient = 0
 
@@ -227,8 +229,8 @@ class train():
 
             losses.append(sum(loss_epoch) / len(loss_epoch))
             accs.append(sum(acc_epoch) / len(acc_epoch))
-            print('Epoch [{}/{}], Loss: {:.4f}, Acc: {:.4f}'
-                  .format(epoch + 1, num_epochs, losses[-1], accs[-1]))
+            # print('Epoch [{}/{}], Loss: {:.4f}, Acc: {:.4f}'
+            #       .format(epoch + 1, num_epochs, losses[-1], accs[-1]))
 
             ######## Validation process ########
             val_losses = []
@@ -248,14 +250,14 @@ class train():
                     pred = yhat.max(1)[1]
                     correct = (pred == y_batch).sum()
                     acc = correct.item() / len(pred)
-                    val_loss = loss_fn(yhat, y_batch)
+                    val_loss = loss_fn(yhat, y_batch.long())
                     val_losses.append(val_loss.item())
                     val_acc.append(acc)
 
                 Acc_val.append(sum(val_acc) / len(val_acc))
                 Loss_val.append(sum(val_losses) / len(val_losses))
-                print('Evaluation Loss:{:.4f}, Acc: {:.4f}'
-                      .format(Loss_val[-1], Acc_val[-1]))
+                # print('Evaluation Loss:{:.4f}, Acc: {:.4f}'
+                #       .format(Loss_val[-1], Acc_val[-1]))
 
             ######## early stop ########
             Acc_es = Acc_val[-1]
@@ -263,41 +265,43 @@ class train():
             if Acc_es > acc_max:
                 acc_max = Acc_es
                 patient = 0
-                print('----Model saved!----')
+                # print('----Model saved!----')
                 torch.save(model, 'max_model.pt')
             else:
                 patient += 1
             if patient > self.patient:
-                print('----Early stopping----')
+                # print('----Early stopping----')
                 break
 
         ######## test process ########
         # print("start test")
-        #     test_losses = []
-        #     test_acc = []
-        # model = torch.load('max_model.pt')
-        # with torch.no_grad():
-        #     for (x_batch, y_batch) in zip(test_list[0], test_list[1]):
-        #         x_batch = np.array(x_batch)
-        #         x_batch = np.expand_dims(x_batch, axis=1)
-        #         x_batch = torch.from_numpy(x_batch)
-        #         y_batch = torch.from_numpy(np.array(y_batch))
-        #         x_batch = x_batch.to(self.device)
-        #         y_batch = y_batch.to(self.device)
-        #
-        #         model.eval()
-        #
-        #         yhat = model(x_batch)
-        #         pred = yhat.max(1)[1]
-        #         correct = (pred == y_batch).sum()
-        #         acc = correct.item() / len(pred)
-        #         test_loss = loss_fn(yhat, y_batch)
-        #         test_losses.append(test_loss.item())
-        #         test_acc.append(acc)
-        #
-        #     print('Test Loss:{:.4f}, Acc: {:.4f}'
-        #           .format(sum(test_losses) / len(test_losses), sum(test_acc) / len(test_acc)))
-        #     Acc_test = (sum(test_acc) / len(test_acc))
+        test_losses = []
+        test_acc = []
+        model = torch.load('max_model.pt')
+        with torch.no_grad():
+            for (x_batch, y_batch) in zip(test_list[0], test_list[1]):
+                x_batch = np.array(x_batch)
+                x_batch = np.expand_dims(x_batch, axis=1)
+                x_batch = torch.from_numpy(x_batch)
+                y_batch = torch.from_numpy(np.array(y_batch))
+                x_batch = x_batch.to(self.device)
+                y_batch = y_batch.to(self.device)
+
+                model.eval()
+
+                yhat = model(x_batch)
+                pred = yhat.max(1)[1]
+                correct = (pred == y_batch).sum()
+                acc = correct.item() / len(pred)
+                test_loss = loss_fn(yhat, y_batch.long())
+                test_losses.append(test_loss.item())
+                test_acc.append(acc)
+
+            # print('Test Loss:{:.4f}, Acc: {:.4f}'
+            #       .format(sum(test_losses) / len(test_losses), sum(test_acc) / len(test_acc)))
+            Acc_test = (sum(test_acc) / len(test_acc))
+            save_list.append('Test Loss:{:.4f}, Acc: {:.4f}'
+                             .format(sum(test_losses) / len(test_losses), sum(test_acc) / len(test_acc)))
 
         # save the loss(acc) for plotting the loss(acc) curve
         save_path = Path(os.getcwd())
@@ -312,9 +316,16 @@ class train():
             save_history['val_loss'] = Loss_val
             save_history.close()
         time_elapsed = time.time() - start_time
-        print('Training complete in {:.0f}m {:.0f}s'.format(
+        # print('Training complete in {:.0f}m {:.0f}s'.format(
+        #     time_elapsed // 60, time_elapsed % 60))
+        # print('Best val Acc: {:4f}'.format(acc_max))
+        save_list.append('Training complete in {:.0f}m {:.0f}s'.format(
             time_elapsed // 60, time_elapsed % 60))
-        print('Best val Acc: {:4f}'.format(acc_max))
+        save_list.append('Best train Loss: {:4f}, Acc: {:4f}'.format(losses[-1], accs[-1]))
+        save_list.append('Evaluation Loss:{:.4f}, Acc: {:.4f}'.format(Loss_val[-1], Acc_val[-1]))
+        save_list.append('Best val Acc: {:4f}'.format(acc_max))
+        save_str = "\n".join(save_list)
+        return save_str
 
     def make_train_step(self, model, loss_fn, optimizer):
         def train_step(x, y):
@@ -326,7 +337,7 @@ class train():
             # L1 regularization
             loss_r = self.regulization(model, self.Lambda)
             # yhat is in one-hot representation;
-            loss = loss_fn(yhat, y) + loss_r
+            loss = loss_fn(yhat, y.long()) + loss_r
             # loss = loss_fn(yhat, y)
             loss.backward()
             optimizer.step()
@@ -359,6 +370,17 @@ if __name__ == '__main__':
                         num_T=9,
                         num_S=6,
                         Lambda=0.000001)
-    train_data_list, val_data_list, test_data_list = data_process.split_dataset_by_proportion("11", src_path="", seed=0,
-                                                                                              **proportion)
-    train.train_model(train_data_list, val_data_list, test_data_list, "leave_one_session_out")
+    k = 10
+    type = "11"
+    result_list = []
+    for i in range(k):
+        print("************ {} fold **********".format(str(i)))
+        train_data_list, val_data_list, test_data_list = data_process.split_dataset_by_proportion(type, src_path="",
+                                                                                                  seed=0,
+                                                                                                  **proportion)
+        save_str = train.train_model(train_data_list, val_data_list, test_data_list, "leave_one_session_out", i)
+        result_list.append(save_str)
+    if not Path.exists(Path("result_total_10_fold")):
+        Path("result_total_10_fold").mkdir(parents=True)
+    with open("result_total_10_fold/result_total_10_fold_{}.txt".format(type, "w"))as f:
+        f.write("\n".join(result_list))
