@@ -67,7 +67,6 @@ def split_dataset_by_proportion(event, src_path="", seed=0, **proportion):
 def split_unhealthy_data_by_proportion(src_path="", seed=0, **proportion):
     '''
     根据需要将数据按比例分割
-    :param event: "11", "22" or "*"(11&22)
     :param src_path: data path
     :param type: train
     :param proportion: the proportion of train, test and val

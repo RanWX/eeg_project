@@ -265,12 +265,12 @@ class train():
             if Acc_es > acc_max:
                 acc_max = Acc_es
                 patient = 0
-                print('----Model saved!----')
+                # print('----Model saved!----')
                 torch.save(model, 'max_model.pt')
             else:
                 patient += 1
             if patient > self.patient:
-                print('----Early stopping----')
+                # print('----Early stopping----')
                 break
 
         ######## test process ########
