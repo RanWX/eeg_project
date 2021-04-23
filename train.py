@@ -380,6 +380,7 @@ if __name__ == '__main__':
                                                                                                   **proportion)
         save_str = train.train_model(train_data_list, val_data_list, test_data_list, "leave_one_session_out", i)
         result_list.append(save_str)
+        print(save_str)
     if not Path.exists(Path("result_total_10_fold")):
         Path("result_total_10_fold").mkdir()
     if type == "*":
