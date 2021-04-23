@@ -64,6 +64,65 @@ def split_dataset_by_proportion(event, src_path="", seed=0, **proportion):
         print("split_dataset_by_proportion error. error message is: {}".format(e))
 
 
+def split_healthy_data_by_proportion(src_path="", seed=0, **proportion):
+    '''
+    根据需要将数据按比例分割
+    :param src_path: data path
+    :param type: train
+    :param proportion: the proportion of train, test and val
+    :param seed:
+    :return: train_data_list: [{"data_path":"", "class_name":"", "class_index":0, "data_matrix":""}], val_data_list: [{"data_path":"", "class_name":"", "class_index":0, "data_matrix":""}]
+    '''
+    try:
+        base_path = Path(src_path) if src_path != "" else (Path(os.getcwd()) / "data")
+        hdf_path_list = base_path.glob("sub2_*.hdf")
+        data_attact_list = []
+        data_unattact_list = []
+        # count = 0
+        for i in hdf_path_list:
+            # if count > 10: break
+            # count = count + 1
+            file_name = i.stem
+            # print(file_name)
+            class_name, class_index = _get_healthy_class_info(file_name)
+            data_path = base_path / Path(i)
+            split_data = h5py.File(data_path, 'r')["data"]
+            for j in range(split_data.shape[0]):
+                data_dict = {"data_path": data_path, "class_name": class_name, "class_index": class_index,
+                             "data_matrix": split_data[j, :, :]}
+                if class_index == 0:
+                    data_attact_list.append(data_dict)
+                elif class_index == 1:
+                    data_unattact_list.append(data_dict)
+        np.random.seed(seed)
+        attact_index_perm_list = np.random.permutation(len(data_attact_list))
+        unattact_index_perm_list = np.random.permutation(len(data_unattact_list))
+
+        attact_train_len = int(len(data_attact_list) * proportion["train"])
+        attact_val_len = int(len(data_attact_list) * proportion["val"])
+        attact_test_len = int(len(data_attact_list) * proportion["test"])
+
+        unattact_train_len = int(len(data_unattact_list) * proportion["train"])
+        unattact_val_len = int(len(data_unattact_list) * proportion["val"])
+        unattact_test_len = int(len(data_unattact_list) * proportion["test"])
+
+        train_data_list = [data_attact_list[i] for i in attact_index_perm_list[:attact_train_len]] + [
+            data_unattact_list[j] for j in unattact_index_perm_list[:unattact_train_len]]
+        test_data_list = [data_attact_list[i] for i in
+                          attact_index_perm_list[attact_train_len:attact_train_len + attact_test_len]] + [
+                             data_unattact_list[j] for j in
+                             unattact_index_perm_list[unattact_train_len:unattact_train_len + unattact_test_len]]
+        val_data_list = [data_attact_list[i] for i in
+                         attact_index_perm_list[
+                         attact_train_len + attact_test_len:attact_train_len + attact_test_len + unattact_val_len]] + [
+                            data_unattact_list[j] for j in unattact_index_perm_list[
+                                                           unattact_train_len + unattact_test_len:unattact_train_len + unattact_test_len + unattact_val_len]]
+        return train_data_list, val_data_list, test_data_list
+
+    except Exception as e:
+        print("split_healthy_data_by_proportion error. error message is: {}".format(e))
+
+
 def split_unhealthy_data_by_proportion(src_path="", seed=0, **proportion):
     '''
     根据需要将数据按比例分割
@@ -164,6 +223,19 @@ def _get_class_info(str):
         raise RuntimeError("class type error!")
     return class_name, class_index
 
+def _get_healthy_class_info(str):
+    class_type = re.search("^sub2_\d+_(\d)", str).group(1)
+    class_name = None
+    class_index = None
+    if class_type == '1':
+        class_name = "attack"
+        class_index = 0
+    elif class_type == '2':
+        class_name = "unattack"
+        class_index = 1
+    else:
+        raise RuntimeError("class type error!")
+    return class_name, class_index
 
 def _get_unhealthy_class_info(str):
     class_type = re.search("^sub1_\d+_(\d)", str).group(1)
