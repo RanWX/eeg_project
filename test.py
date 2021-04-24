@@ -385,3 +385,7 @@ def ShallowConvNet(nb_classes, Chans=64, Samples=128, dropoutRate=0.5):
     softmax = Activation('softmax')(dense)
 
     return Model(inputs=input_main, outputs=softmax)
+
+
+
+
