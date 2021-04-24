@@ -11,8 +11,10 @@ plt.rcParams['axes.unicode_minus'] = False
 # 设置图形的显示风格
 # plt.style.use('ggplot')
 # 绘图：daily_Ionset_r_c1_predicted的箱线图
-
-data = data_tools.get_batch_N_fold_acc("../result_total_10_fold/")
+# to exp 1
+# data = data_tools.get_batch_N_fold_acc("../result_total_10_fold/", -1)
+# to exp 2
+data = data_tools.get_batch_N_fold_acc("../result_healthy_10_fold/", 1)
 df = pd.DataFrame(data)
 df.plot.box(title="accuracy in different type",
             showmeans=True,

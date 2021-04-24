@@ -33,7 +33,7 @@ def get_best_acc(data_file, save=""):
     return test_acc, test_loss
 
 
-def get_N_fold_acc(data_file, save=""):
+def get_N_fold_acc(data_file,filename_index, save=""):
     '''
     获取文件的正确率
     :param data_file:
@@ -46,20 +46,20 @@ def get_N_fold_acc(data_file, save=""):
         pattern = re.compile("Test Loss:.+Acc: ([0-9]{1,}[.][0-9]*)")
         acc_list = pattern.findall(content)
     acc_list = [float(i)*100 for i in acc_list]
-    file_name = Path(data_file).stem.split("_")[-1]
+    file_name = Path(data_file).stem.split("_")[filename_index]
     return file_name, acc_list
 
 
-def get_batch_N_fold_acc(data_dir, save=""):
+def get_batch_N_fold_acc(data_dir, filename_index,save=""):
     file_list = Path(data_dir).glob("*.txt")
     data_dict = {}
     for file in file_list:
-        file_name, acc_list = get_N_fold_acc(str(file))
+        file_name, acc_list = get_N_fold_acc(str(file), filename_index)
         data_dict[file_name] = acc_list
     return data_dict
 
 
 if __name__ == '__main__':
-    data_path = '/Users/weiyong/PycharmProjects/eeg_project_test/result_total_10_fold/'
+    data_path = '/Users/weiyong/PycharmProjects/eeg_project_test/result_healthy_10_fold'
     # get_N_fold_acc(data_path)
-    get_batch_N_fold_acc(data_path)
+    get_batch_N_fold_acc(data_path,1)
