@@ -397,6 +397,9 @@ if __name__ == '__main__':
                                          test_data_list, i,
                                          "leave_one_session_out")
         result_list.append(save_str)
+        train_data_list[:] = []
+        val_data_list[:] = []
+        test_data_list[:] = []
     print("\n".join(result_list))
     if not Path.exists(Path("result_conditon_10_fold")):
         Path("result_conditon_10_fold").mkdir()
