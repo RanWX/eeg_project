@@ -18,6 +18,7 @@ plot1 = plt.plot(x, y, '*', label='original values')
 plot2 = plt.plot(x, yvals, 'r', label='fitting values')
 plt.xlabel('timepoint(s)')
 plt.ylabel('accuracy(%)')
+
 plt.legend(loc=4)
 # plt.title('')
 plt.savefig('./results_imgs_3.png', bbox_inches='tight')
