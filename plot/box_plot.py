@@ -12,7 +12,7 @@ plt.rcParams['axes.unicode_minus'] = False
 # plt.style.use('ggplot')
 # 绘图：daily_Ionset_r_c1_predicted的箱线图
 
-data = data_tools.get_batch_N_fold_acc("../result_healthy_10_fold/", 1)
+data = data_tools.get_batch_N_fold_acc("../result_total_10_fold_bak/", -1)
 df = pd.DataFrame(data)
 df.plot.box(title="accuracy in healthy and patient",
             showmeans=True,
@@ -24,5 +24,5 @@ df.plot.box(title="accuracy in healthy and patient",
 # plt.grid(linestyle="--", alpha=0.3)
 plt.xlabel("type")
 plt.ylabel("accuracy(%)")
-plt.savefig('./results_imgs_2.png', bbox_inches='tight')
+plt.savefig('./results_imgs_5.png', bbox_inches='tight')
 
