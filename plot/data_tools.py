@@ -54,7 +54,7 @@ def get_batch_N_fold_acc(data_dir, filename_index,save=""):
     file_list = Path(data_dir).glob("*.txt")
     data_dict = {}
     for file in file_list:
-        print(file)
+        # print(file)
         file_name, acc_list = get_N_fold_acc(str(file), filename_index)
         data_dict[file_name] = acc_list
     return data_dict
